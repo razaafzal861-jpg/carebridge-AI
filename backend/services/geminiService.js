@@ -3,34 +3,22 @@ const dotenv = require('dotenv');
 const triageService = require('./triageService');
 const ocrService = require('./ocrService');
 
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
-const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+const CANDIDATE_MODELS = [
+  process.env.GEMINI_MODEL,
+  'gemini-3.5-flash-lite',
+  'gemini-3.6-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash',
+].filter(Boolean);
 
-/**
- * Generic helper to send request to Google Gemini API
- */
-function callGemini(contents, systemInstruction = null) {
+function sendGeminiRequest(model, key, data) {
   return new Promise((resolve, reject) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-    
-    const payload = {
-      contents,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.2,
-      },
-    };
-
-    if (systemInstruction) {
-      payload.systemInstruction = {
-        parts: [{ text: systemInstruction }],
-      };
-    }
-
-    const data = JSON.stringify(payload);
-
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
     const req = https.request(
       url,
       {
@@ -39,7 +27,7 @@ function callGemini(contents, systemInstruction = null) {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(data),
         },
-        timeout: 10000,
+        timeout: 8000,
       },
       (res) => {
         let body = '';
@@ -58,7 +46,7 @@ function callGemini(contents, systemInstruction = null) {
               reject(new Error(`Failed to parse Gemini output: ${err.message}`));
             }
           } else {
-            reject(new Error(`Gemini API error (${res.statusCode}): ${body}`));
+            reject(new Error(`Gemini ${model} returned HTTP ${res.statusCode}: ${body.slice(0, 120)}`));
           }
         });
       }
@@ -67,12 +55,51 @@ function callGemini(contents, systemInstruction = null) {
     req.on('error', (err) => reject(err));
     req.on('timeout', () => {
       req.destroy();
-      reject(new Error('Gemini API call timed out'));
+      reject(new Error(`Gemini ${model} request timed out`));
     });
 
     req.write(data);
     req.end();
   });
+}
+
+/**
+ * Generic helper with automatic multi-model failover
+ */
+async function callGemini(contents, systemInstruction = null) {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error('GEMINI_API_KEY environment variable is not set');
+  }
+
+  const payload = {
+    contents,
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.2,
+    },
+  };
+
+  if (systemInstruction) {
+    payload.systemInstruction = {
+      parts: [{ text: systemInstruction }],
+    };
+  }
+
+  const data = JSON.stringify(payload);
+
+  let lastError = null;
+  for (const model of CANDIDATE_MODELS) {
+    try {
+      const result = await sendGeminiRequest(model, key, data);
+      return result;
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Gemini Failover] Model ${model} failed, attempting next: ${err.message}`);
+    }
+  }
+
+  throw lastError || new Error('All Gemini candidate models failed');
 }
 
 /**

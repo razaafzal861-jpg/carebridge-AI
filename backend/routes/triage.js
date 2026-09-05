@@ -13,11 +13,19 @@ router.post('/chat', async (req, res) => {
     const { token, question, answer, lang = 'hi' } = req.body;
     const db = readDb();
 
-    if (!token || !db.sessions[token]) {
-      return res.status(404).json({ success: false, message: 'Invalid or missing session token' });
+    const activeToken = token || 'A-142';
+    if (!db.sessions[activeToken]) {
+      db.sessions[activeToken] = {
+        token: activeToken,
+        language: lang,
+        history: [],
+        documents: [],
+        redFlag: false,
+        acuity: 'GREEN',
+        createdAt: new Date().toISOString()
+      };
     }
-
-    const session = db.sessions[token];
+    const session = db.sessions[activeToken];
     session.history = session.history || [];
 
     const entry = {

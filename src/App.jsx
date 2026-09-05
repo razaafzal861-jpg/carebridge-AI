@@ -295,8 +295,21 @@ function ConverseScreen({ t, code, token }) {
     if (!clean || aiThinking) return;
 
     const entry = { q: currentQ, a: clean };
-    setHistory((h) => [...h, entry]);
+    const nextHistory = [...history, entry];
+    setHistory(nextHistory);
     setAiThinking(true);
+
+    const fallbackLocal = () => {
+      if (nextHistory.length === 1) {
+        setCurrentQ(t.q2);
+        setCurrentOpts(t.opts2);
+      } else if (nextHistory.length === 2) {
+        setCurrentQ(t.q3);
+        setCurrentOpts(t.opts3);
+      } else {
+        setEnoughInfo(true);
+      }
+    };
 
     try {
       const res = await sendTriageMessage({
@@ -306,24 +319,19 @@ function ConverseScreen({ t, code, token }) {
         lang: code,
       });
 
-      if (res && res.success) {
+      if (res && res.success && res.nextQuestion) {
         if (res.redFlag) setFlag(true);
         if (res.enoughInfo) setEnoughInfo(true);
-        if (res.nextQuestion) setCurrentQ(res.nextQuestion);
+        setCurrentQ(res.nextQuestion);
         if (res.quickOptions && res.quickOptions.length > 0) {
           setCurrentOpts(res.quickOptions);
         }
+      } else {
+        fallbackLocal();
       }
     } catch (e) {
       console.warn("Triage error fallback:", e);
-      if (history.length === 0) {
-        setCurrentQ(t.q2);
-        setCurrentOpts(t.opts2);
-      } else {
-        setCurrentQ(t.q3);
-        setCurrentOpts(t.opts3);
-        setEnoughInfo(true);
-      }
+      fallbackLocal();
     } finally {
       setAiThinking(false);
     }
