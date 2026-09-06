@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Mic, Camera, FileText, CheckCircle2, ChevronRight, ChevronLeft,
   ShieldCheck, Volume2, Upload, AlertTriangle, User, Clock, HelpCircle,
-  Languages, Check, FilePlus2, Stethoscope, X, MicOff, RefreshCw, LogOut, Lock
+  Languages, Check, FilePlus2, Stethoscope, X, MicOff, RefreshCw, LogOut, Lock, Send
 } from "lucide-react";
 import {
   startSession,
@@ -263,10 +263,11 @@ function HomeScreen({ t, token }) {
   );
 }
 
-/* ---------- Conversation screen: Dynamic Multi-Turn Gemini AI Triage & Voice ---------- */
+/* ---------- Conversation screen: Dynamic Multi-Turn Gemini AI Triage & Voice/Text ---------- */
 function ConverseScreen({ t, code, token }) {
   const [currentQ, setCurrentQ] = useState(t.q1);
-  const [currentOpts, setCurrentOpts] = useState(t.opts1);
+  const [currentOpts, setCurrentOpts] = useState([]); // No fixed options on Q1 to avoid limiting the patient!
+  const [inputText, setInputText] = useState("");
   const [history, setHistory] = useState([]);
   const [flag, setFlag] = useState(false);
   const [listening, setListening] = useState(false);
@@ -284,7 +285,8 @@ function ConverseScreen({ t, code, token }) {
   useEffect(() => {
     setHistory([]);
     setCurrentQ(t.q1);
-    setCurrentOpts(t.opts1);
+    setCurrentOpts([]);
+    setInputText("");
     setFlag(false);
     setInterim("");
     setEnoughInfo(false);
@@ -337,6 +339,14 @@ function ConverseScreen({ t, code, token }) {
     }
   };
 
+  const handleSend = (e) => {
+    e?.preventDefault();
+    const clean = inputText.trim();
+    if (!clean || aiThinking || isDone) return;
+    answer(clean);
+    setInputText("");
+  };
+
   const toggleMic = () => {
     if (!micSupported) return;
 
@@ -372,6 +382,10 @@ function ConverseScreen({ t, code, token }) {
 
   const isDone = enoughInfo || history.length >= 4;
 
+  const inputPlaceholder = code === "hi"
+    ? "अपनी तकलीफ़ यहाँ लिखें (उदा. पेट दर्द, सिरदर्द, बुखार)..."
+    : (code === "ur" ? "اپنی تکلیف یہاں ٹائپ کریں..." : "Type your symptom here (e.g. stomach pain, fever, headache)...");
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {flag && (
@@ -394,15 +408,29 @@ function ConverseScreen({ t, code, token }) {
               <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-teal-100 text-teal-800">AI</span>
               {currentQ}
             </div>
-            <div className="flex flex-wrap gap-2">
-              {currentOpts.map((o) => (
-                <button key={o} onClick={() => answer(o)} disabled={aiThinking}
-                  className="f-body text-sm font-medium px-4 py-2.5 rounded-full hover:shadow transition-all disabled:opacity-50 cursor-pointer"
-                  style={{ background: T.paper, border: `1.5px solid ${T.mist}`, color: T.teal }}>
-                  {o}
-                </button>
-              ))}
-            </div>
+
+            {/* If options exist (from Gemini follow-up), show them as quick clickable chips */}
+            {currentOpts && currentOpts.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {currentOpts.map((o) => (
+                  <button key={o} onClick={() => answer(o)} disabled={aiThinking}
+                    className="f-body text-sm font-medium px-4 py-2.5 rounded-full hover:shadow transition-all disabled:opacity-50 cursor-pointer"
+                    style={{ background: T.paper, border: `1.5px solid ${T.mist}`, color: T.teal }}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Hint when no options on Q1 */}
+            {(!currentOpts || currentOpts.length === 0) && (
+              <div className="f-body text-xs italic px-3 py-1.5 rounded-xl self-start bg-gray-50 border text-gray-500" style={{ borderColor: T.mist }}>
+                {code === "hi"
+                  ? "💡 नीचे माइक दबाकर अपनी तकलीफ़ बोलें, या टाइप करके भेजें"
+                  : (code === "ur" ? "💡 نیچے مائیک دبا کر بولیں، یا ٹائپ کر کے بھیجیں" : "💡 Speak using the mic below or type your complaint freely")}
+              </div>
+            )}
+
             {aiThinking && (
               <div className="f-body text-xs italic px-3 py-1 rounded-lg self-start text-teal-700 animate-pulse">
                 ✨ Gemini AI डॉक्टर विश्लेषण कर रहे हैं...
@@ -424,31 +452,56 @@ function ConverseScreen({ t, code, token }) {
         <div ref={endRef} />
       </div>
 
-      <div className="flex flex-col items-center justify-center py-5 shrink-0 gap-2" style={{ borderTop: `1px solid ${T.mist}` }}>
-        <div className="flex items-center justify-center">
-          <div className="relative w-20 h-20 flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center py-3 shrink-0 gap-2 px-6" style={{ borderTop: `1px solid ${T.mist}`, background: T.paper }}>
+        {/* Freeform Text Typing Box */}
+        {!isDone && (
+          <form onSubmit={handleSend} className="w-full flex items-center gap-2 max-w-lg">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={inputPlaceholder}
+              disabled={aiThinking || isDone}
+              className="flex-1 px-4 py-2.5 rounded-2xl border text-sm outline-none focus:ring-2 focus:ring-teal-600 bg-gray-50 shadow-inner"
+              style={{ borderColor: T.mist, color: T.ink }}
+            />
+            <button
+              type="submit"
+              disabled={!inputText.trim() || aiThinking || isDone}
+              className="p-2.5 rounded-2xl text-white disabled:opacity-40 transition-transform active:scale-95 shadow-sm cursor-pointer flex items-center justify-center"
+              style={{ background: T.teal }}
+              title="Send"
+            >
+              <Send size={18} />
+            </button>
+          </form>
+        )}
+
+        {/* Microphone Button */}
+        <div className="flex items-center justify-center gap-2">
+          <div className="relative w-14 h-14 flex items-center justify-center">
             {listening && (
               <>
                 <span className="ring1 absolute inset-0 rounded-full" style={{ background: T.coral }} />
-                <span className="ring2 absolute inset-2 rounded-full" style={{ background: T.coral }} />
+                <span className="ring2 absolute inset-1.5 rounded-full" style={{ background: T.coral }} />
               </>
             )}
             <button onClick={toggleMic} disabled={!micSupported || isDone}
-              className="relative w-14 h-14 rounded-full flex items-center justify-center shadow-md disabled:opacity-40"
+              className="relative w-12 h-12 rounded-full flex items-center justify-center shadow-md disabled:opacity-40 cursor-pointer"
               style={{ background: listening ? T.coral : T.teal }}>
-              {micSupported ? <Mic size={22} color="#fff" /> : <MicOff size={22} color="#fff" />}
+              {micSupported ? <Mic size={20} color="#fff" /> : <MicOff size={20} color="#fff" />}
             </button>
           </div>
           {listening && (
-            <div className="ml-4 flex items-end gap-1 h-8">
-              {[6, 14, 22, 12, 18, 8].map((h, idx) => (
-                <span key={idx} className="bar w-1.5 rounded-full" style={{ height: h, background: T.marigoldD, animationDelay: `${idx * 0.08}s` }} />
+            <div className="flex items-end gap-1 h-6">
+              {[6, 14, 20, 12, 16, 8].map((h, idx) => (
+                <span key={idx} className="bar w-1 rounded-full" style={{ height: h, background: T.marigoldD, animationDelay: `${idx * 0.08}s` }} />
               ))}
             </div>
           )}
         </div>
-        <span className="f-body text-xs opacity-70 text-center px-6" style={{ color: micSupported ? T.ink : T.coral }}>
-          {micSupported ? (listening ? t.listening : t.speakOrTap) : t.micUnsupported}
+        <span className="f-body text-xs opacity-70 text-center" style={{ color: micSupported ? T.ink : T.coral }}>
+          {micSupported ? (listening ? t.listening : (code === "hi" ? "माइक दबाकर बोलें या ऊपर टाइप करें" : (code === "ur" ? "مائیک دبا کر بولیں یا ٹائپ کریں" : "Press mic to speak or type above"))) : t.micUnsupported}
         </span>
       </div>
     </div>
