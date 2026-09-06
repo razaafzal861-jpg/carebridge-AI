@@ -215,47 +215,150 @@ function LangScreen({ t, chosen, setChosen }) {
   );
 }
 
-function ConsentScreen({ t, agreed, setAgreed }) {
+function ConsentScreen({
+  t, agreed, setAgreed,
+  patientName, setPatientName,
+  patientAge, setPatientAge,
+  patientGender, setPatientGender,
+  code
+}) {
   const items = [t.c1, t.c2, t.c3];
+
+  const fillDemo = (name, age, gender) => {
+    setPatientName(name);
+    setPatientAge(age);
+    setPatientGender(gender);
+  };
+
   return (
-    <div className="flex-1 flex flex-col items-center px-8 py-8 overflow-auto">
-      <ShieldCheck size={28} style={{ color: T.marigold }} />
-      <h1 className="f-display text-2xl font-semibold mt-2" style={{ color: T.ink }}>{t.consentTitle}</h1>
-      <p className="f-body text-sm opacity-60" style={{ color: T.ink }}>{t.consentSub}</p>
-      <div className="w-full max-w-xl mt-6 rounded-3xl p-6" style={{ background: T.paper, border: `1px solid ${T.mist}` }}>
+    <div className="flex-1 flex flex-col items-center px-8 py-5 overflow-auto">
+      <ShieldCheck size={26} style={{ color: T.marigold }} />
+      <h1 className="f-display text-2xl font-semibold mt-1" style={{ color: T.ink }}>{t.consentTitle}</h1>
+      <p className="f-body text-xs opacity-60" style={{ color: T.ink }}>{t.consentSub}</p>
+
+      {/* Patient Registration Details Card */}
+      <div className="w-full max-w-xl mt-3 rounded-3xl p-5 border bg-white shadow-sm" style={{ borderColor: T.mist }}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <User size={18} style={{ color: T.teal }} />
+            <h3 className="f-display text-base font-bold" style={{ color: T.ink }}>
+              {code === "hi" ? "मरीज़ का विवरण (Patient Details)" : (code === "ur" ? "مریض کی تفصیلات" : "Patient Details")}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => fillDemo(code === "hi" ? "राहुल शर्मा" : (code === "ur" ? "راہل شرما" : "Rahul Sharma"), "32", "Male")}
+            className="text-xs font-semibold px-3 py-1 rounded-full text-teal-800 bg-teal-50 border hover:bg-teal-100 cursor-pointer transition-colors"
+            style={{ borderColor: T.mist }}
+          >
+            ⚡ {code === "hi" ? "डेमो ऑटो-फिल" : "Demo Fill"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-semibold text-gray-600 block mb-1">
+              {code === "hi" ? "पूरा नाम (Full Name)" : (code === "ur" ? "پورا نام" : "Full Name")}
+            </label>
+            <input
+              type="text"
+              value={patientName}
+              onChange={(e) => setPatientName(e.target.value)}
+              placeholder={code === "hi" ? "उदा. राहुल शर्मा" : (code === "ur" ? "مثلاً سنیتا یا راہل" : "e.g. Rahul Sharma")}
+              className="w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-2 focus:ring-teal-600 bg-gray-50"
+              style={{ borderColor: T.mist, color: T.ink }}
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 block mb-1">
+              {code === "hi" ? "उम्र (Age in Years)" : (code === "ur" ? "عمر (سال)" : "Age in Years")}
+            </label>
+            <input
+              type="number"
+              value={patientAge}
+              onChange={(e) => setPatientAge(e.target.value)}
+              placeholder="उदा. 35"
+              min="1"
+              max="120"
+              className="w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-2 focus:ring-teal-600 bg-gray-50"
+              style={{ borderColor: T.mist, color: T.ink }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-3">
+          <label className="text-xs font-semibold text-gray-600 block mb-1.5">
+            {code === "hi" ? "लिंग (Gender)" : (code === "ur" ? "جنس" : "Gender")}
+          </label>
+          <div className="flex gap-2">
+            {[
+              { id: "Male", labelHi: "👨 पुरुष (Male)", labelUr: "👨 مرد", labelEn: "👨 Male" },
+              { id: "Female", labelHi: "👩 महिला (Female)", labelUr: "👩 خاتون", labelEn: "👩 Female" },
+              { id: "Other", labelHi: "⚧ अन्य (Other)", labelUr: "⚧ دیگر", labelEn: "⚧ Other" },
+            ].map((g) => {
+              const active = patientGender === g.id;
+              const text = code === "hi" ? g.labelHi : (code === "ur" ? g.labelUr : g.labelEn);
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => setPatientGender(g.id)}
+                  className="flex-1 py-2 px-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer"
+                  style={{
+                    background: active ? T.teal : T.sage,
+                    color: active ? "#ffffff" : T.ink,
+                    borderColor: active ? T.teal : T.mist
+                  }}
+                >
+                  {text}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Consent Checkboxes */}
+      <div className="w-full max-w-xl mt-3 rounded-3xl p-4 bg-white border" style={{ borderColor: T.mist }}>
+        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          {code === "hi" ? "अस्पताल सहमति व शर्तें" : "Hospital Consent & Privacy"}
+        </div>
         {items.map((txt, i) => (
-          <label key={i} className="flex items-start gap-3 py-3 cursor-pointer">
-            <span className="mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+          <label key={i} className="flex items-start gap-3 py-1.5 cursor-pointer">
+            <span className="mt-0.5 w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-colors"
               style={{ background: agreed[i] ? T.teal : T.sage, border: `1.5px solid ${agreed[i] ? T.teal : T.mist}` }}
               onClick={() => setAgreed((a) => a.map((v, idx) => (idx === i ? !v : v)))}>
-              {agreed[i] && <Check size={15} color="#fff" />}
+              {agreed[i] && <Check size={13} color="#fff" />}
             </span>
-            <span className="f-body text-sm leading-relaxed" style={{ color: T.ink }}>{txt}</span>
+            <span className="f-body text-xs leading-relaxed" style={{ color: T.ink }}>{txt}</span>
           </label>
         ))}
-      </div>
-      <div className="flex gap-3 mt-6">
-        <button className="flex items-center gap-2 f-body font-medium text-sm px-5 py-3 rounded-2xl" style={{ background: T.sage, color: T.teal }}>
-          <User size={16} /> {t.loginAbha}
-        </button>
-        <button className="flex items-center gap-2 f-body font-medium text-sm px-5 py-3 rounded-2xl" style={{ background: T.sage, color: T.teal }}>
-          {t.newPatient}
-        </button>
       </div>
     </div>
   );
 }
 
-function HomeScreen({ t, token }) {
+function HomeScreen({ t, token, patientName, patientAge, patientGender, code }) {
+  const displayName = patientName?.trim() || (code === "hi" ? "मरीज़" : (code === "ur" ? "محترم" : "Patient"));
+  const genderLabel = patientGender === "Female"
+    ? (code === "hi" ? "महिला" : (code === "ur" ? "خاتون" : "Female"))
+    : (patientGender === "Other" ? (code === "hi" ? "अन्य" : "Other") : (code === "hi" ? "पुरुष" : (code === "ur" ? "مرد" : "Male")));
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-8 py-8 text-center">
       <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: T.sage }}>
         <User size={26} style={{ color: T.teal }} />
       </div>
       <p className="f-body text-sm opacity-60" style={{ color: T.ink }}>{t.welcome}</p>
-      <h1 className="f-display text-3xl font-semibold mt-1" style={{ color: T.ink }}>{t.greetName}</h1>
-      <p className="f-body text-sm mt-2 max-w-sm" style={{ color: "#5B6A62" }}>{t.homeBlurb}</p>
-      <div className="flex items-center gap-4 mt-8 px-6 py-4 rounded-3xl" style={{ background: T.paper, border: `1px solid ${T.mist}` }}>
+      <h1 className="f-display text-3xl font-semibold mt-1" style={{ color: T.ink }}>
+        {code === "hi" ? `नमस्ते, ${displayName}` : (code === "ur" ? `خوش آمدید، ${displayName}` : `Hello, ${displayName}`)}
+      </h1>
+      <div className="inline-flex items-center gap-2 mt-2 f-body text-xs px-3.5 py-1 rounded-full text-teal-900 bg-teal-50 border" style={{ borderColor: T.mist }}>
+        {patientAge ? `${patientAge} ${code === "hi" ? "वर्ष" : (code === "ur" ? "سال" : "yrs")} · ` : ""}{genderLabel}
+      </div>
+      <p className="f-body text-sm mt-3 max-w-sm" style={{ color: "#5B6A62" }}>{t.homeBlurb}</p>
+      <div className="flex items-center gap-4 mt-6 px-6 py-4 rounded-3xl" style={{ background: T.paper, border: `1px solid ${T.mist}` }}>
         <span className="f-body text-sm" style={{ color: T.ink }}>{t.tokenLabel}</span>
         <span className="f-display text-2xl font-bold px-3 py-1 rounded-xl" style={{ background: T.teal, color: T.marigold }}>{token || "A-142"}</span>
       </div>
@@ -974,6 +1077,9 @@ function DoctorLoginScreen({ onLoginSuccess, onBack }) {
 function PatientKioskApp({ onExitToGateway }) {
   const [step, setStep] = useState("lang");
   const [lang, setLang] = useState("Hindi");
+  const [patientName, setPatientName] = useState("");
+  const [patientAge, setPatientAge] = useState("");
+  const [patientGender, setPatientGender] = useState("Male");
   const [token, setToken] = useState("A-142");
   const [agreed, setAgreed] = useState([false, false, false]);
   const [docs, setDocs] = useState([
@@ -991,10 +1097,16 @@ function PatientKioskApp({ onExitToGateway }) {
 
   const handleStartSession = async () => {
     try {
+      const finalName = patientName.trim() || (code === "hi" ? "अनाम मरीज़" : (code === "ur" ? "نامعلوم مریض" : "Walk-in Patient"));
+      const finalAge = patientAge ? Number(patientAge) : 32;
+      const finalGender = patientGender || "Male";
+
       const res = await startSession({
         lang,
         agreed,
-        patientName: lang === "Hindi" ? "सुनीता देवी" : (lang === "Urdu" ? "سنیتا دیوی" : "Sunita Devi")
+        patientName: finalName,
+        age: finalAge,
+        gender: finalGender
       });
       if (res.success && res.token) {
         setToken(res.token);
@@ -1007,6 +1119,9 @@ function PatientKioskApp({ onExitToGateway }) {
   const handleResetForNewPatient = () => {
     setStep("lang");
     setAgreed([false, false, false]);
+    setPatientName("");
+    setPatientAge("");
+    setPatientGender("Male");
     setDocs([
       { name: "पर्ची · Apollo Clinic", tag: "प्रिस्क्रिप्शन", date: "12 जून" }
     ]);
@@ -1051,8 +1166,30 @@ function PatientKioskApp({ onExitToGateway }) {
         <Chrome t={t} idx={idx} minutes={7} onHelp={() => setShowHelp(true)} onExitToGateway={onExitToGateway} />
         
         {step === "lang" && <LangScreen t={t} chosen={lang} setChosen={setLang} />}
-        {step === "consent" && <ConsentScreen t={t} agreed={agreed} setAgreed={setAgreed} />}
-        {step === "home" && <HomeScreen t={t} token={token} />}
+        {step === "consent" && (
+          <ConsentScreen
+            t={t}
+            agreed={agreed}
+            setAgreed={setAgreed}
+            patientName={patientName}
+            setPatientName={setPatientName}
+            patientAge={patientAge}
+            setPatientAge={setPatientAge}
+            patientGender={patientGender}
+            setPatientGender={setPatientGender}
+            code={code}
+          />
+        )}
+        {step === "home" && (
+          <HomeScreen
+            t={t}
+            token={token}
+            patientName={patientName}
+            patientAge={patientAge}
+            patientGender={patientGender}
+            code={code}
+          />
+        )}
         {step === "converse" && <ConverseScreen t={t} code={code} token={token} />}
         {step === "docs" && <DocsScreen t={t} token={token} docs={docs} setDocs={setDocs} />}
         {step === "slip" && <TokenSlipScreen t={t} token={token} onNewPatient={handleResetForNewPatient} />}

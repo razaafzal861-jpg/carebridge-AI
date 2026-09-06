@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Patient Session & ABHA Management Routes
  */
 
@@ -10,7 +10,14 @@ let tokenCounter = 142;
 
 router.post('/start', (req, res) => {
   try {
-    const { lang = 'Hindi', agreed = [true, true, true], abhaId = '', patientName = 'Sunita Devi' } = req.body;
+    const {
+      lang = 'Hindi',
+      agreed = [true, true, true],
+      abhaId = '',
+      patientName = 'Walk-in Patient',
+      age = 35,
+      gender = 'Female'
+    } = req.body;
     const db = readDb();
 
     const token = 'A-' + tokenCounter;
@@ -18,9 +25,9 @@ router.post('/start', (req, res) => {
 
     const newSession = {
       token,
-      patientName,
-      age: 42,
-      gender: 'Female',
+      patientName: patientName || 'Walk-in Patient',
+      age: Number(age) || 35,
+      gender: gender || 'Female',
       lang,
       agreed,
       abhaId: abhaId || '91-4521-8890-1234',
