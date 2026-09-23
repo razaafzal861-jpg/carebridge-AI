@@ -13,11 +13,21 @@ import {
   updateConsultation
 } from "./api";
 
-/* ---------- Design tokens ---------- */
+/* ---------- Design tokens: Deep Teal + Emerald + Warm Ivory ---------- */
 const T = {
-  ink: "#1F2A24", teal: "#1B4B43", teal2: "#2F6E5F", sage: "#F2F6F1",
-  paper: "#FFFFFF", marigold: "#E8A33D", marigoldD: "#C97F1E",
-  coral: "#D6503F", mist: "#DCE7E1", mistD: "#C3D2CB",
+  ink: "#112621",       // Premium deep slate-forest for typography
+  teal: "#0F4C45",      // Deep Teal (Header, primary identity, key containers)
+  teal2: "#186A5E",     // Mid Deep Teal (Accents, labels)
+  emerald: "#1E8E78",   // Emerald (Buttons, active states, key CTAs)
+  emeraldD: "#14705E",  // Darker Emerald (Audio waves, hover)
+  sage: "#F7F4EC",      // Warm Ivory (Container, cards background, subtle panels)
+  paper: "#FFFFFF",     // Pure White for elevated cards
+  marigold: "#1E8E78",  // Emerald mapped to action buttons
+  marigoldD: "#14705E", // Darker Emerald
+  coral: "#D6503F",     // Red-Flag emergency indicator
+  mist: "#E6E2D6",      // Warm Ivory soft border
+  mistD: "#D2CCC0",     // Warm Ivory disabled border
+  ivoryBg: "#EFECE3",   // Page backdrop for elegant contrast
 };
 
 const FONTS = (
@@ -182,8 +192,8 @@ function StepFooter({ t, label, onBack, onNext, nextDisabled, hideBack, rtl }) {
         </button>
       ) : <span />}
       <button onClick={onNext} disabled={nextDisabled}
-        className="flex items-center gap-2 f-display font-semibold text-lg px-8 py-3.5 rounded-2xl shadow-sm transition-opacity"
-        style={{ background: nextDisabled ? T.mistD : T.marigold, color: nextDisabled ? "#8AA69C" : T.teal, opacity: nextDisabled ? 0.7 : 1 }}>
+        className="flex items-center gap-2 f-display font-semibold text-lg px-8 py-3.5 rounded-2xl shadow-sm transition-opacity cursor-pointer"
+        style={{ background: nextDisabled ? T.mistD : T.emerald, color: nextDisabled ? "#8AA69C" : "#ffffff", opacity: nextDisabled ? 0.7 : 1 }}>
         {label} <NextIcon size={20} />
       </button>
     </div>
@@ -193,16 +203,16 @@ function StepFooter({ t, label, onBack, onNext, nextDisabled, hideBack, rtl }) {
 function LangScreen({ t, chosen, setChosen }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-8 py-10 overflow-auto">
-      <Languages size={30} style={{ color: T.marigold }} />
+      <Languages size={30} style={{ color: T.emerald }} />
       <h1 className="f-display text-3xl font-semibold mt-3" style={{ color: T.ink }}>{t.langTitle}</h1>
       <p className="f-body text-sm opacity-60 mt-1" style={{ color: T.ink }}>{t.langSub}</p>
       <div className="grid grid-cols-3 gap-4 mt-9 w-full max-w-lg">
         {LANGS.map((l) => (
           <button key={l.e} onClick={() => setChosen(l.e)}
-            className="flex flex-col items-center justify-center gap-1.5 rounded-3xl py-5 transition-all"
+            className="flex flex-col items-center justify-center gap-1.5 rounded-3xl py-5 transition-all cursor-pointer"
             style={{ background: chosen === l.e ? T.teal : T.paper, border: `2px solid ${chosen === l.e ? T.teal : T.mist}` }}>
             <span className="f-display text-2xl w-10 h-10 flex items-center justify-center rounded-full"
-              style={{ background: chosen === l.e ? T.marigold : T.sage, color: chosen === l.e ? T.teal : T.teal2 }}>{l.g}</span>
+              style={{ background: chosen === l.e ? T.emerald : T.sage, color: chosen === l.e ? "#ffffff" : T.teal2 }}>{l.g}</span>
             <span className="f-display font-semibold text-base" style={{ color: chosen === l.e ? "#fff" : T.ink }}>{l.n}</span>
             <span className="f-body text-[11px]" style={{ color: chosen === l.e ? T.mist : "#8A968F" }}>{l.e}</span>
           </button>
@@ -232,7 +242,7 @@ function ConsentScreen({
 
   return (
     <div className="flex-1 flex flex-col items-center px-8 py-5 overflow-auto">
-      <ShieldCheck size={26} style={{ color: T.marigold }} />
+      <ShieldCheck size={26} style={{ color: T.emerald }} />
       <h1 className="f-display text-2xl font-semibold mt-1" style={{ color: T.ink }}>{t.consentTitle}</h1>
       <p className="f-body text-xs opacity-60" style={{ color: T.ink }}>{t.consentSub}</p>
 
@@ -327,7 +337,7 @@ function ConsentScreen({
         {items.map((txt, i) => (
           <label key={i} className="flex items-start gap-3 py-1.5 cursor-pointer">
             <span className="mt-0.5 w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-colors"
-              style={{ background: agreed[i] ? T.teal : T.sage, border: `1.5px solid ${agreed[i] ? T.teal : T.mist}` }}
+              style={{ background: agreed[i] ? T.emerald : T.sage, border: `1.5px solid ${agreed[i] ? T.emerald : T.mist}` }}
               onClick={() => setAgreed((a) => a.map((v, idx) => (idx === i ? !v : v)))}>
               {agreed[i] && <Check size={13} color="#fff" />}
             </span>
@@ -360,7 +370,7 @@ function HomeScreen({ t, token, patientName, patientAge, patientGender, code }) 
       <p className="f-body text-sm mt-3 max-w-sm" style={{ color: "#5B6A62" }}>{t.homeBlurb}</p>
       <div className="flex items-center gap-4 mt-6 px-6 py-4 rounded-3xl" style={{ background: T.paper, border: `1px solid ${T.mist}` }}>
         <span className="f-body text-sm" style={{ color: T.ink }}>{t.tokenLabel}</span>
-        <span className="f-display text-2xl font-bold px-3 py-1 rounded-xl" style={{ background: T.teal, color: T.marigold }}>{token || "A-142"}</span>
+        <span className="f-display text-2xl font-bold px-3 py-1 rounded-xl text-white shadow-sm" style={{ background: T.emerald }}>{token || "A-142"}</span>
       </div>
     </div>
   );
@@ -572,7 +582,7 @@ function ConverseScreen({ t, code, token }) {
               type="submit"
               disabled={!inputText.trim() || aiThinking || isDone}
               className="p-2.5 rounded-2xl text-white disabled:opacity-40 transition-transform active:scale-95 shadow-sm cursor-pointer flex items-center justify-center"
-              style={{ background: T.teal }}
+              style={{ background: T.emerald }}
               title="Send"
             >
               <Send size={18} />
@@ -591,7 +601,7 @@ function ConverseScreen({ t, code, token }) {
             )}
             <button onClick={toggleMic} disabled={!micSupported || isDone}
               className="relative w-12 h-12 rounded-full flex items-center justify-center shadow-md disabled:opacity-40 cursor-pointer"
-              style={{ background: listening ? T.coral : T.teal }}>
+              style={{ background: listening ? T.coral : T.emerald }}>
               {micSupported ? <Mic size={20} color="#fff" /> : <MicOff size={20} color="#fff" />}
             </button>
           </div>
@@ -656,11 +666,11 @@ function DocsScreen({ t, token, docs, setDocs }) {
   return (
     <div className="flex-1 flex flex-col items-center px-8 py-8 overflow-auto">
       <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*,.pdf" className="hidden" />
-      <FileText size={26} style={{ color: T.marigold }} />
+      <FileText size={26} style={{ color: T.emerald }} />
       <h1 className="f-display text-2xl font-semibold mt-2" style={{ color: T.ink }}>{t.docsTitle}</h1>
       <p className="f-body text-sm opacity-60" style={{ color: T.ink }}>{t.docsSub}</p>
       <div className="flex gap-4 mt-6">
-        <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-2 px-8 py-6 rounded-3xl cursor-pointer hover:opacity-90 transition-opacity" style={{ background: T.teal, color: "#fff" }}>
+        <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-2 px-8 py-6 rounded-3xl cursor-pointer hover:opacity-90 transition-opacity" style={{ background: T.emerald, color: "#fff" }}>
           <Camera size={22} /> <span className="f-body text-sm font-medium">{t.scanCam}</span>
         </button>
         <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-2 px-8 py-6 rounded-3xl cursor-pointer hover:opacity-90 transition-opacity" style={{ background: T.sage, color: T.teal }}>
@@ -748,8 +758,8 @@ function TokenSlipScreen({ t, token, onNewPatient }) {
 
       <button
         onClick={onNewPatient}
-        className="mt-5 flex items-center gap-2 f-display font-semibold text-base px-8 py-3 rounded-2xl shadow-md cursor-pointer transition-transform active:scale-95"
-        style={{ background: T.marigold, color: T.teal }}>
+        className="mt-5 flex items-center gap-2 f-display font-semibold text-base px-8 py-3 rounded-2xl shadow-md cursor-pointer transition-transform active:scale-95 text-white"
+        style={{ background: T.emerald }}>
         <RefreshCw size={16} /> {t.next_slip}
       </button>
     </div>
@@ -790,7 +800,7 @@ function DoctorDashboard({ onLogout }) {
       {/* Doctor Top Navigation */}
       <div className="flex items-center justify-between px-6 py-3 border-b shrink-0" style={{ background: T.teal, color: "#fff" }}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center f-display font-bold text-sm" style={{ background: T.marigold, color: T.teal }}>Dr</div>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center f-display font-bold text-sm text-white shadow-sm" style={{ background: T.emerald }}>Dr</div>
           <div>
             <div className="f-display text-base font-bold leading-tight">Dr. A. Sharma, MD</div>
             <div className="f-body text-[11px] opacity-70">General Medicine · OPD Counter 4</div>
@@ -951,7 +961,7 @@ function DoctorDashboard({ onLogout }) {
 
 function GatewayScreen({ onSelectPatient, onSelectDoctor }) {
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center p-6 f-body" style={{ background: "#E7ECE6" }}>
+    <div className="w-full min-h-screen flex flex-col items-center justify-center p-6 f-body" style={{ background: "#F7F4EC" }}>
       {FONTS}
       <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col border" style={{ borderColor: T.mist }}>
         <div className="px-8 py-6 flex items-center justify-between border-b" style={{ background: T.teal, color: "#fff" }}>
@@ -982,7 +992,7 @@ function GatewayScreen({ onSelectPatient, onSelectDoctor }) {
                 style={{ background: T.teal, color: "#fff" }}>
                 <User size={36} />
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2" style={{ background: T.marigold, color: T.teal }}>
+              <span className="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2" style={{ background: T.emerald, color: "#fff" }}>
                 Patient Entry
               </span>
               <h3 className="f-display text-2xl font-bold" style={{ color: T.ink }}>Patient Kiosk</h3>
@@ -991,7 +1001,7 @@ function GatewayScreen({ onSelectPatient, onSelectDoctor }) {
                 Choose language, speak symptoms, scan previous prescriptions, and get your instant OPD token slip.
               </p>
               <button className="mt-6 flex items-center gap-2 f-display font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm text-white transition-opacity group-hover:opacity-90 cursor-pointer"
-                style={{ background: T.teal }}>
+                style={{ background: T.emerald }}>
                 Start Patient Intake <ChevronRight size={16} />
               </button>
             </div>
@@ -1012,8 +1022,8 @@ function GatewayScreen({ onSelectPatient, onSelectDoctor }) {
               <p className="f-body text-xs text-gray-500 mt-3 leading-relaxed">
                 View live OPD queue with red-flag triage priority, read AI clinical summaries, and write consultation notes.
               </p>
-              <button className="mt-6 flex items-center gap-2 f-display font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm transition-opacity group-hover:opacity-90 cursor-pointer"
-                style={{ background: T.marigold, color: T.teal }}>
+              <button className="mt-6 flex items-center gap-2 f-display font-semibold text-sm px-6 py-2.5 rounded-xl shadow-sm transition-opacity group-hover:opacity-90 cursor-pointer text-white"
+                style={{ background: T.emerald }}>
                 Doctor Login <ChevronRight size={16} />
               </button>
             </div>
@@ -1032,7 +1042,7 @@ function DoctorLoginScreen({ onLoginSuccess, onBack }) {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center p-6 f-body" style={{ background: "#E7ECE6" }}>
+    <div className="w-full min-h-screen flex items-center justify-center p-6 f-body" style={{ background: "#F7F4EC" }}>
       {FONTS}
       <div className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-8 border text-center relative" style={{ borderColor: T.mist }}>
         <button onClick={onBack} className="absolute top-6 left-6 text-gray-400 hover:text-gray-700 flex items-center gap-1 text-xs font-medium cursor-pointer">
@@ -1065,7 +1075,7 @@ function DoctorLoginScreen({ onLoginSuccess, onBack }) {
           </div>
           <button type="submit"
             className="w-full py-3.5 rounded-2xl f-display font-semibold text-base shadow-sm text-white cursor-pointer transition-transform active:scale-98 mt-1"
-            style={{ background: T.teal }}>
+            style={{ background: T.emerald }}>
             Sign In to OPD Station
           </button>
         </form>
@@ -1158,7 +1168,7 @@ function PatientKioskApp({ onExitToGateway }) {
   const nextDisabled = step === "consent" && !agreed.every(Boolean);
 
   return (
-    <div className="w-full flex items-center justify-center f-body" style={{ background: "#E7ECE6", minHeight: "100vh", padding: 20 }}>
+    <div className="w-full flex items-center justify-center f-body" style={{ background: "#F7F4EC", minHeight: "100vh", padding: 20 }}>
       {FONTS}
       <div dir={rtl ? "rtl" : "ltr"} className="w-full flex flex-col overflow-hidden rounded-[28px] shadow-2xl relative"
         style={{ maxWidth: 940, height: 650, background: T.sage }}>
@@ -1233,7 +1243,7 @@ export default function App() {
 
   if (portalMode === "doctor") {
     return (
-      <div className="w-full flex items-center justify-center f-body" style={{ background: "#E7ECE6", minHeight: "100vh", padding: 20 }}>
+      <div className="w-full flex items-center justify-center f-body" style={{ background: "#F7F4EC", minHeight: "100vh", padding: 20 }}>
         {FONTS}
         <div className="w-full flex flex-col overflow-hidden rounded-[28px] shadow-2xl relative"
           style={{ maxWidth: 980, height: 670, background: "#fff" }}>
