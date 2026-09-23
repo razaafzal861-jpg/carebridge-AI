@@ -143,7 +143,7 @@ function Chrome({ t, idx, minutes, onHelp, onExitToGateway }) {
   return (
     <div className="flex items-center justify-between px-6 py-3 shrink-0" style={{ background: T.teal, color: "#fff" }}>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-full flex items-center justify-center f-display font-bold text-sm" style={{ background: T.marigold, color: T.teal }}>M</div>
+        <img src="/logo.png" alt="CareBridge Logo" className="w-8 h-8 rounded-full object-cover bg-white p-0.5 border border-white/20 shadow-sm" />
         <span className="f-display text-lg tracking-wide">{t.brand}</span>
         <span className="f-body text-xs opacity-60 ml-1">{t.brandSub}</span>
       </div>
@@ -956,7 +956,7 @@ function GatewayScreen({ onSelectPatient, onSelectDoctor }) {
       <div className="w-full max-w-4xl bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col border" style={{ borderColor: T.mist }}>
         <div className="px-8 py-6 flex items-center justify-between border-b" style={{ background: T.teal, color: "#fff" }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center f-display font-bold text-lg" style={{ background: T.marigold, color: T.teal }}>M</div>
+            <img src="/logo.png" alt="CareBridge Logo" className="w-11 h-11 rounded-2xl object-cover bg-white p-1 border border-white/20 shadow-sm" />
             <div>
               <h1 className="f-display text-2xl font-bold tracking-wide">CareBridge · केयरब्रिज</h1>
               <p className="f-body text-xs opacity-70">Government Hospital AI OPD Smart Intake & Triage System</p>
